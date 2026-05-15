@@ -39,14 +39,14 @@ export default function CoinCard({ symbol, name, price, balance, minedToday, onW
               <Coins className="w-3 h-3" />
               Balance
             </span>
-            <span className="text-white font-mono font-bold">{balance.toFixed(4)} {symbol}</span>
+            <span className="text-white font-mono font-bold">{(balance || 0).toFixed(4)} {symbol}</span>
           </div>
           <div className="flex justify-between items-center text-xs">
             <span className="text-gray-500 flex items-center gap-2">
               <Timer className="w-3 h-3" />
               24h Yield
             </span>
-            <span className="text-gray-400 font-mono text-[10px]">+{minedToday.toFixed(6)} {symbol}</span>
+            <span className="text-gray-400 font-mono text-[10px]">+{(minedToday || 0).toFixed(6)} {symbol}</span>
           </div>
         </div>
       </div>

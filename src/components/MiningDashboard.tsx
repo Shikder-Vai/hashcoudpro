@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import CoinCard from './CoinCard';
 import AIOptimizer from './AIOptimizer';
 import WithdrawModal from './WithdrawModal';
+import ConnectModal from './ConnectModal';
 import HardwareAnalyzer from './HardwareAnalyzer';
 import WorkerList from './WorkerList';
 import WorkersView from './WorkersView';
@@ -32,18 +33,20 @@ export default function Dashboard() {
   });
 
   const [prices, setPrices] = React.useState<any>(null);
+  const [isConnectModalOpen, setIsConnectModalOpen] = React.useState(false);
   const [selectedCoin, setSelectedCoin] = React.useState<{ symbol: string, balance: number } | null>(null);
   const [walletAddress, setWalletAddress] = React.useState<string | null>(() => {
     return localStorage.getItem('wallet_address');
   });
 
   const connectWallet = async () => {
-    // Prompt for a real XMR address for demonstration
-    const address = window.prompt("Enter your Monero (XMR) Wallet Address to sync real pool stats:", "44AFFq5kSiGBoZ4NMD2hL7YW1nodej8rjY8rR939K2j36KzD3a69r4CjWz5Mh9K2j36KzD3a69r4CjWz5Mh9");
-    if (address) {
-      setWalletAddress(address);
-      localStorage.setItem('wallet_address', address);
-    }
+    setIsConnectModalOpen(true);
+  };
+
+  const handleConnect = (address: string, symbol: string) => {
+    setWalletAddress(address);
+    localStorage.setItem('wallet_address', address);
+    localStorage.setItem('wallet_symbol', symbol);
   };
 
   const disconnectWallet = () => {
@@ -351,6 +354,12 @@ export default function Dashboard() {
           balance={selectedCoin.balance}
         />
       )}
+
+      <ConnectModal 
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        onConnect={handleConnect}
+      />
     </div>
   );
 }

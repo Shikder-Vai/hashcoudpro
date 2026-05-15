@@ -22,7 +22,7 @@ export default function PoolsView() {
       const stats = await getNetworkStats();
       if (stats) {
         // Just subtly update the first one if it's our primary
-        setPoolData(prev => prev.map((p, i) => i === 0 ? { ...p, hashrate: `${(stats.hashrate / 1000000).toFixed(1)} MH/s` } : p));
+        setPoolData(prev => prev.map((p, i) => i === 0 ? { ...p, hashrate: `${((stats.hashrate || 0) / 1000000).toFixed(1)} MH/s` } : p));
       }
     };
     fetchNet();
