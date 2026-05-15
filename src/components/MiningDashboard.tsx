@@ -30,12 +30,21 @@ export default function Dashboard() {
 
   const [prices, setPrices] = React.useState<any>(null);
   const [selectedCoin, setSelectedCoin] = React.useState<{ symbol: string, balance: number } | null>(null);
-  const [walletAddress, setWalletAddress] = React.useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = React.useState<string | null>(() => {
+    return localStorage.getItem('wallet_address');
+  });
 
   const connectWallet = async () => {
     // In a real environment, this would call window.ethereum.request
     // For now, we simulate a successful connection for the UI demonstration
-    setWalletAddress("0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
+    const address = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
+    setWalletAddress(address);
+    localStorage.setItem('wallet_address', address);
+  };
+
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    localStorage.removeItem('wallet_address');
   };
 
   React.useEffect(() => {
@@ -129,12 +138,19 @@ export default function Dashboard() {
 
             <div className="h-8 w-[1px] bg-[#2A2D35] mx-1" />
             {walletAddress ? (
-              <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-xl">
+              <button 
+                onClick={disconnectWallet}
+                className="flex items-center gap-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-3 py-1.5 rounded-xl transition-colors group relative"
+                title="Click to disconnect"
+              >
                 <Shield className="w-3.5 h-3.5 text-orange-500" />
                 <span className="text-[10px] font-mono text-orange-200">
                   {walletAddress.substring(0, 4)}...{walletAddress.substring(38)}
                 </span>
-              </div>
+                <div className="absolute -bottom-8 right-0 bg-[#0D0E12] border border-[#1E2128] px-2 py-1 rounded text-[8px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-red-500">
+                  Click to Disconnect
+                </div>
+              </button>
             ) : (
               <button 
                 onClick={connectWallet}
