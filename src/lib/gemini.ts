@@ -28,8 +28,8 @@ export async function getMiningOptimization(data: any) {
       }
     });
 
-    const text = response.text || "{}";
-    return JSON.parse(text);
+    const text = response.text;
+    return JSON.parse(text || "{}");
   } catch (e) {
     console.error("AI response parse error:", e);
     return { optimizations: [] };
@@ -69,8 +69,8 @@ export async function analyzeHardwareSuitability(specs: any) {
       }
     });
 
-    const text = response.text || "{}";
-    return JSON.parse(text);
+    const text = response.text;
+    return JSON.parse(text || "{}");
   } catch (e) {
     console.error("AI response parse error:", e);
     return {

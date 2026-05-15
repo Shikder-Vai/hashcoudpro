@@ -40,7 +40,8 @@ export default function HardwareAnalyzer() {
     }
   };
 
-  const score = Number(result?.suitabilityScore) || 0;
+  const rawScore = result?.suitabilityScore;
+  const score = typeof rawScore === 'number' && !isNaN(rawScore) ? rawScore : 0;
   
   return (
     <div className="bg-[#0D0E12] border border-[#1E2128] rounded-2xl overflow-hidden flex flex-col h-full">
@@ -120,7 +121,7 @@ export default function HardwareAnalyzer() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">{score}%</span>
+                  <span className="text-white font-bold text-lg">{Math.round(score)}%</span>
                 </div>
               </div>
               <div>

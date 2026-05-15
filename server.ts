@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import "dotenv/config";
 import { createServer as createViteServer } from "vite";
 import { getMiningOptimization, analyzeHardwareSuitability } from "./src/lib/gemini.js";
 
