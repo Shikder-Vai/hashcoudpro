@@ -74,7 +74,8 @@ async function startServer() {
       const result = await analyzeHardwareSuitability(req.body);
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Hardware analysis error:", error);
+      res.status(500).json({ error: error.message || "Internal Server Error" });
     }
   });
 
@@ -84,7 +85,8 @@ async function startServer() {
       const result = await getMiningOptimization(req.body);
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("AI optimization error:", error);
+      res.status(500).json({ error: error.message || "Internal Server Error" });
     }
   });
 

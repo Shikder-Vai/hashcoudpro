@@ -184,7 +184,7 @@ export default function Dashboard() {
             {/* Chart, AI & Hardware Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 flex flex-col gap-6">
-                <div className="bg-[#0D0E12] border border-[#1E2128] rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+                <div className="bg-[#0D0E12] border border-[#1E2128] rounded-2xl p-4 sm:p-6 relative overflow-hidden min-h-[400px]">
                   <div className="flex justify-between items-center mb-8">
                     <div>
                       <h3 className="text-white font-semibold text-lg flex items-center gap-2">
