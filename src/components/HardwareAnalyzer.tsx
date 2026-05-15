@@ -166,7 +166,7 @@ export default function HardwareAnalyzer() {
                       <Copy className="w-3 h-3" />
                     </button>
                   </div>
-                  {result.setupCommand}
+                  {result.setupCommand || "Generating... Click 'Initialize Engine Audit' to begin."}
                 </div>
               </div>
             </div>

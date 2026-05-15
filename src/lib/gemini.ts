@@ -18,7 +18,7 @@ export async function getMiningOptimization(data: any) {
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       contents: `As a crypto mining expert AI, analyze the following mining statistics and provide 3 actionable optimization tips:
     ${JSON.stringify(data)}
     
@@ -47,7 +47,7 @@ export async function analyzeHardwareSuitability(specs: any) {
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       contents: `As a mining hardware expert, analyze this PC configuration for cryptocurrency mining suitability:
     System: ${specs.systemModel}
     CPU: ${specs.processor}
