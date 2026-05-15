@@ -23,14 +23,21 @@ export default function HardwareAnalyzer() {
     os: "Windows 10 Pro"
   };
 
+  const [errorStatus, setErrorStatus] = React.useState<number | null>(null);
+
   const runAnalysis = async () => {
     setLoading(true);
+    setErrorStatus(null);
     try {
       const response = await fetch('/api/hardware/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userSpecs),
       });
+      if (!response.ok) {
+        setErrorStatus(response.status);
+        throw new Error(`Error ${response.status}`);
+      }
       const data = await response.json();
       setResult(data);
     } catch (e) {
@@ -65,6 +72,17 @@ export default function HardwareAnalyzer() {
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto space-y-6">
+        {errorStatus === 429 && (
+          <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+            <div className="text-xs">
+              <p className="text-orange-200 font-bold mb-1">API Quota Exceeded</p>
+              <p className="text-gray-500 leading-relaxed">
+                You've hit the Gemini API rate limit. Please wait about a minute before trying again, or check your API key settings.
+              </p>
+            </div>
+          </div>
+        )}
         {!result ? (
           <div className="space-y-4">
             <div className="p-4 bg-black/20 rounded-xl border border-dashed border-[#2A2D35]">
