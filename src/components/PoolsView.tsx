@@ -3,16 +3,30 @@ import { motion } from 'motion/react';
 import { Database, Zap, Globe, Shield, Users, ArrowUpRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const POOL_DATA = [
-  { id: 1, name: 'MoneroOcean', region: 'Global', fee: '0.9%', hashrate: '125.5 MH/s' },
-  { id: 2, name: 'SupportXMR', region: 'Europe/US', fee: '0.6%', hashrate: '82.2 MH/s' },
-  { id: 3, name: 'Nanopool', region: 'Global', fee: '1.0%', hashrate: '45.9 MH/s' },
-  { id: 4, name: 'MineXMR', region: 'Global', fee: '1.0%', hashrate: '18.1 MH/s' },
+import { getNetworkStats } from '../services/miningService';
+
+const INITIAL_POOL_DATA = [
+  { id: 1, name: 'MoneroOcean', region: 'Global', fee: '0.9%', hashrate: '125.5 MH/s', miners: '42.1k' },
+  { id: 2, name: 'SupportXMR', region: 'Europe/US', fee: '0.6%', hashrate: '82.2 MH/s', miners: '18.4k' },
+  { id: 3, name: 'Nanopool', region: 'Global', fee: '1.0%', hashrate: '45.9 MH/s', miners: '12.9k' },
+  { id: 4, name: 'MineXMR', region: 'Global', fee: '1.0%', hashrate: '18.1 MH/s', miners: '8.2k' },
 ];
 
 export default function PoolsView() {
   const [connectedId, setConnectedId] = React.useState(1);
   const [switchingId, setSwitchingId] = React.useState<number | null>(null);
+  const [poolData, setPoolData] = React.useState(INITIAL_POOL_DATA);
+
+  React.useEffect(() => {
+    const fetchNet = async () => {
+      const stats = await getNetworkStats();
+      if (stats) {
+        // Just subtly update the first one if it's our primary
+        setPoolData(prev => prev.map((p, i) => i === 0 ? { ...p, hashrate: `${(stats.hashrate / 1000000).toFixed(1)} MH/s` } : p));
+      }
+    };
+    fetchNet();
+  }, []);
 
   const handleSwitch = async (id: number) => {
     setSwitchingId(id);
@@ -36,7 +50,7 @@ export default function PoolsView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {POOL_DATA.map((pool) => (
+        {poolData.map((pool) => (
           <div key={pool.id} className={cn(
             "bg-[#0D0E12] border p-6 rounded-2xl transition-all group relative",
             connectedId === pool.id ? "border-orange-500/50 ring-1 ring-orange-500/20" : "border-[#1E2128] hover:border-orange-500/30"
@@ -78,7 +92,7 @@ export default function PoolsView() {
                 <p className="text-[10px] text-gray-600 uppercase font-bold mb-1">Miners</p>
                 <div className="flex items-center gap-1">
                   <Users className="w-3 h-3 text-orange-500" />
-                  <p className="text-white font-mono text-xs">12.4k</p>
+                  <p className="text-white font-mono text-xs">{pool.miners}</p>
                 </div>
               </div>
             </div>

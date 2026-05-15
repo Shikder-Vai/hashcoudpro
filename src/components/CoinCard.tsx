@@ -28,7 +28,7 @@ export default function CoinCard({ symbol, name, price, balance, minedToday, onW
             </div>
           </div>
           <div className="text-right">
-            <p className="text-white font-mono font-bold text-sm">${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="text-white font-mono font-bold text-sm">${(price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
             <p className="text-green-500 text-[9px] font-bold">+0.00%</p>
           </div>
         </div>

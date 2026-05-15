@@ -11,8 +11,10 @@ export default function WithdrawalHistory() {
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/withdrawals');
-      const data = await res.json();
-      setHistory(data);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -91,7 +93,7 @@ export default function WithdrawalHistory() {
                       </span>
                       <div className="flex items-center gap-1 justify-end text-gray-600">
                         <Clock className="w-3 h-3" />
-                        <span className="text-[9px]">{new Date(tx.timestamp).toLocaleDateString()}</span>
+                        <span className="text-[9px]">{tx.timestamp ? new Date(tx.timestamp).toLocaleDateString() : 'Pending'}</span>
                       </div>
                     </div>
                   </div>

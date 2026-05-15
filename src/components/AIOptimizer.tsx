@@ -19,8 +19,10 @@ export default function AIOptimizer({ stats }: { stats: any }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(stats),
       });
-      const data = await response.json();
-      setOptimizations(data.optimizations);
+      if (response.ok) {
+        const data = await response.json();
+        setOptimizations(data.optimizations || []);
+      }
     } catch (error) {
       console.error(error);
     } finally {

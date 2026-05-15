@@ -4,16 +4,39 @@ import { Server, Activity, Clock, CircleDot, SignalHigh, SignalLow } from 'lucid
 import { cn } from '../lib/utils';
 import { Worker } from '../types';
 
+import { getRealWorkerList } from '../services/miningService';
+
 export default function WorkerList() {
   const [workers, setWorkers] = React.useState<Worker[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [rebootingId, setRebootingId] = React.useState<string | null>(null);
+  
+  const walletAddress = localStorage.getItem('wallet_address');
 
   const fetchWorkers = async () => {
     try {
+      if (!walletAddress) {
+        // If no wallet connected, maybe show local workers from server or nothing
+        const res = await fetch('/api/workers');
+        if (res.ok) {
+          const data = await res.json();
+          setWorkers(data);
+        }
+        return;
+      }
+
+      // Fetch real pool workers
+      const realWorkers = await getRealWorkerList(walletAddress);
+      
+      // Merge with local server workers if they exist, or just use real ones
       const res = await fetch('/api/workers');
-      const data = await res.json();
-      setWorkers(data);
+      if (res.ok) {
+        const localWorkers = await res.json();
+        const allWorkers = [...realWorkers, ...localWorkers.filter((lw: any) => !realWorkers.find(rw => rw.id === lw.id))];
+        setWorkers(allWorkers);
+      } else {
+        setWorkers(realWorkers);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -98,7 +121,7 @@ export default function WorkerList() {
                     <div className="flex items-center gap-2 mt-0.5">
                       <Clock className="w-3 h-3 text-gray-600" />
                       <span className="text-[10px] text-gray-500 font-mono">
-                        {new Date(worker.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {worker.lastSeen ? new Date(worker.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Never'}
                       </span>
                     </div>
                   </div>

@@ -29,6 +29,11 @@ async function startServer() {
     res.json(workers);
   });
 
+  // Withdrawal History endpoint (missing in previous edit)
+  app.get("/api/withdrawals", (req, res) => {
+    res.json(withdrawalHistory);
+  });
+
   app.post("/api/workers", (req, res) => {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: "Name is required" });
@@ -74,18 +79,27 @@ async function startServer() {
 // Real crypto prices from public API (fallback to simulation if API fails)
   app.get("/api/prices", async (req, res) => {
     try {
-      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,litecoin&vs_currencies=usd");
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero,litecoin&vs_currencies=usd");
+      if (!response.ok) throw new Error("Gecko API error");
       const data = await response.json();
       res.json({
-        BTC: data.bitcoin.usd,
-        ETH: data.ethereum.usd,
-        LTC: data.litecoin.usd,
+        monero: data.monero?.usd || 150.25,
+        bitcoin: data.bitcoin?.usd || 64000,
+        ethereum: data.ethereum?.usd || 3400,
+        XMR: data.monero?.usd || 150.25,
+        BTC: data.bitcoin?.usd || 64000,
+        ETH: data.ethereum?.usd || 3400,
+        LTC: data.litecoin?.usd || 85,
       });
     } catch (error) {
       // Fallback
       res.json({
-        BTC: 64000 + Math.random() * 500,
-        ETH: 3400 + Math.random() * 50,
+        monero: 152.40 + Math.random() * 2,
+        bitcoin: 64100 + Math.random() * 500,
+        ethereum: 3420 + Math.random() * 50,
+        XMR: 152.40 + Math.random() * 2,
+        BTC: 64100 + Math.random() * 500,
+        ETH: 3420 + Math.random() * 50,
         LTC: 85 + Math.random() * 5,
       });
     }
@@ -113,6 +127,10 @@ async function startServer() {
     }
   });
 
+  // Catch-all for API routes to prevent landing on SPA index.html
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({ error: `API route ${req.method} ${req.url} not found` });
+  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
