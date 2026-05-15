@@ -10,17 +10,39 @@ async function startServer() {
 
   app.use(express.json());
 
-  // In-memory withdrawal history (persists while server is running)
+  // In-memory withdrawal history
   let withdrawalHistory: any[] = [];
+  
+  // In-memory workers list
+  let workers: any[] = [
+    { id: "w1", name: "Main Rig - RTX 3090", hashrate: 124.5, status: "online", lastSeen: new Date().toISOString() },
+    { id: "w2", name: "Secondary - RX 6800", hashrate: 62.1, status: "online", lastSeen: new Date().toISOString() }
+  ];
 
   // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
 
-  // Withdrawal History endpoints
-  app.get("/api/withdrawals", (req, res) => {
-    res.json(withdrawalHistory);
+  // Workers status endpoint
+  app.get("/api/workers", (req, res) => {
+    res.json(workers);
+  });
+
+  app.post("/api/workers", (req, res) => {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Name is required" });
+    
+    const newWorker = {
+      id: "w_" + Math.random().toString(36).substring(7),
+      name,
+      hashrate: 0, // Initially 0 until it starts mining
+      status: "online",
+      lastSeen: new Date().toISOString(),
+    };
+    
+    workers = [...workers, newWorker];
+    res.json(newWorker);
   });
 
   app.post("/api/withdrawals", (req, res) => {
@@ -91,11 +113,6 @@ async function startServer() {
     }
   });
 
-  // Workers status endpoint
-  app.get("/api/workers", (req, res) => {
-    // Return empty if user wants no dummy data, or keep it for structure
-    res.json([]);
-  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

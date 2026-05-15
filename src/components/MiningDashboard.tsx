@@ -55,8 +55,29 @@ export default function Dashboard() {
         setPrices(data);
       } catch (e) { console.error(e); }
     };
+    
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/workers');
+        const workers = await res.json();
+        const totalHashrate = workers.reduce((acc: number, w: any) => acc + (w.status === 'online' ? w.hashrate : 0), 0);
+        const activeCount = workers.filter((w: any) => w.status === 'online').length;
+        
+        setStats({
+          hashrate: totalHashrate,
+          activeWorkers: activeCount,
+          efficiency: activeCount > 0 ? 94.2 : 0, // Mock efficiency
+          powerUsage: activeCount * 120, // Mock power usage
+        });
+      } catch (e) { console.error(e); }
+    };
+
     fetchPrices();
-    const interval = setInterval(fetchPrices, 10000);
+    fetchStats();
+    const interval = setInterval(() => {
+      fetchPrices();
+      fetchStats();
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -287,7 +308,7 @@ export default function Dashboard() {
         ) : currentView === 'pools' ? (
           <PoolsView />
         ) : (
-          <SettingsView />
+          <SettingsView walletAddress={walletAddress} setWalletAddress={setWalletAddress} />
         )}
       </main>
 

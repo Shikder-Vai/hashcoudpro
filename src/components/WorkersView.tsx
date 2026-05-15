@@ -4,6 +4,30 @@ import { Server, Activity, Plus } from 'lucide-react';
 import WorkerList from './WorkerList';
 
 export default function WorkersView() {
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [newWorkerName, setNewWorkerName] = React.useState("");
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  const handleAddWorker = async () => {
+    if (!newWorkerName.trim()) return;
+    
+    try {
+      const res = await fetch('/api/workers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newWorkerName })
+      });
+      
+      if (res.ok) {
+        setNewWorkerName("");
+        setIsAdding(false);
+        setRefreshKey(prev => prev + 1);
+      }
+    } catch (e) {
+      console.error("Failed to add worker:", e);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -15,15 +39,44 @@ export default function WorkersView() {
           <h2 className="text-2xl font-bold text-white">Cloud & Local Workers</h2>
           <p className="text-gray-500 text-sm">Monitor and manage all your mining nodes in real-time</p>
         </div>
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
-          <Plus className="w-4 h-4" />
-          Add Worker
-        </button>
+        {!isAdding ? (
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Add Worker
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 bg-[#1A1C21] p-1 rounded-xl border border-[#2A2D35] animate-in fade-in slide-in-from-right-4 duration-300">
+            <input 
+              autoFocus
+              type="text" 
+              placeholder="Rig Name (e.g. RTX 4090)"
+              value={newWorkerName}
+              onChange={(e) => setNewWorkerName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddWorker()}
+              className="bg-transparent border-none outline-none px-3 py-1.5 text-xs text-white w-48 placeholder:text-gray-600"
+            />
+            <button 
+              onClick={handleAddWorker}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+            >
+              Add
+            </button>
+            <button 
+              onClick={() => setIsAdding(false)}
+              className="text-gray-500 hover:text-white px-2 py-1.5 text-xs transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <WorkerList />
+          <WorkerList key={refreshKey} />
         </div>
         <div className="space-y-6">
           <div className="bg-[#0D0E12] border border-[#1E2128] p-6 rounded-2xl">

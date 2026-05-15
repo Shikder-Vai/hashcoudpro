@@ -4,10 +4,10 @@ import { Database, Zap, Globe, Shield, Users, ArrowUpRight } from 'lucide-react'
 import { cn } from '../lib/utils';
 
 const POOL_DATA = [
-  { id: 1, name: 'SlushPool', region: 'Global', fee: '2.0%', hashrate: '24.5 EH/s' },
-  { id: 2, name: 'Ethermine', region: 'Europe', fee: '1.0%', hashrate: '12.2 EH/s' },
-  { id: 3, name: 'F2Pool', region: 'Asia', fee: '2.5%', hashrate: '18.9 EH/s' },
-  { id: 4, name: 'AntPool', region: 'Global', fee: '4.0%', hashrate: '32.1 EH/s' },
+  { id: 1, name: 'MoneroOcean', region: 'Global', fee: '0.9%', hashrate: '125.5 MH/s' },
+  { id: 2, name: 'SupportXMR', region: 'Europe/US', fee: '0.6%', hashrate: '82.2 MH/s' },
+  { id: 3, name: 'Nanopool', region: 'Global', fee: '1.0%', hashrate: '45.9 MH/s' },
+  { id: 4, name: 'MineXMR', region: 'Global', fee: '1.0%', hashrate: '18.1 MH/s' },
 ];
 
 export default function PoolsView() {
