@@ -204,8 +204,9 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
-                  <div className="h-[250px] sm:h-[300px] min-h-[250px] w-full min-w-0">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="relative h-[250px] sm:h-[300px] w-full min-w-0">
+                    <div className="absolute inset-0">
+                      <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={MOCK_CHART_DATA}>
                         <defs>
                           <linearGradient id="colorH" x1="0" y1="0" x2="0" y2="1">
@@ -225,6 +226,7 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
+              </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {prices && (

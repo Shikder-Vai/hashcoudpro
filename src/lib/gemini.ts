@@ -16,18 +16,18 @@ export const ai = apiKey
 export async function getMiningOptimization(data: any) {
   if (!ai) throw new Error("Gemini API key not configured");
   
-  const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `As a crypto mining expert AI, analyze the following mining statistics and provide 3 actionable optimization tips:
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `As a crypto mining expert AI, analyze the following mining statistics and provide 3 actionable optimization tips:
     ${JSON.stringify(data)}
     
     Response format: JSON with an "optimizations" array of objects {title, description}.`,
-    config: {
-      responseMimeType: "application/json"
-    }
-  });
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
 
-  try {
     const text = response.text || "{}";
     return JSON.parse(text);
   } catch (e) {
@@ -39,9 +39,10 @@ export async function getMiningOptimization(data: any) {
 export async function analyzeHardwareSuitability(specs: any) {
   if (!ai) throw new Error("Gemini API key not configured");
   
-  const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `As a mining hardware expert, analyze this PC configuration for cryptocurrency mining suitability:
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `As a mining hardware expert, analyze this PC configuration for cryptocurrency mining suitability:
     System: ${specs.systemModel}
     CPU: ${specs.processor}
     RAM: ${specs.ram}
@@ -57,12 +58,11 @@ export async function analyzeHardwareSuitability(specs: any) {
     IMPORTANT: In the "warnings" or a new field "setupSteps", explicitly mention that for Windows 10 Pro x64, they should download "xmrig-6.26.0-windows-x64.zip" from the official releases.
     
     Keep it professional and technical.`,
-    config: {
-      responseMimeType: "application/json"
-    }
-  });
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
 
-  try {
     const text = response.text || "{}";
     return JSON.parse(text);
   } catch (e) {

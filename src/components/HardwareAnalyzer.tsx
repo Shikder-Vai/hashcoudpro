@@ -40,6 +40,8 @@ export default function HardwareAnalyzer() {
     }
   };
 
+  const score = Number(result?.suitabilityScore) || 0;
+  
   return (
     <div className="bg-[#0D0E12] border border-[#1E2128] rounded-2xl overflow-hidden flex flex-col h-full">
       <div className="p-6 border-b border-[#1E2128] flex justify-between items-center">
@@ -109,16 +111,16 @@ export default function HardwareAnalyzer() {
                   <circle
                     cx="40" cy="40" r="34"
                     fill="transparent"
-                    stroke={(result.suitabilityScore || 0) > 50 ? "#22c55e" : "#eab308"}
+                    stroke={score > 50 ? "#22c55e" : "#eab308"}
                     strokeWidth="8"
                     strokeDasharray={213}
-                    strokeDashoffset={213 - (213 * (result.suitabilityScore || 0)) / 100}
+                    strokeDashoffset={213 - (213 * score) / 100}
                     strokeLinecap="round"
                     className="transition-all duration-1000"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">{(result.suitabilityScore || 0)}%</span>
+                  <span className="text-white font-bold text-lg">{score}%</span>
                 </div>
               </div>
               <div>
@@ -129,7 +131,7 @@ export default function HardwareAnalyzer() {
 
             {/* Warnings */}
             <div className="space-y-2">
-              {result.warnings && result.warnings.length > 0 && result.warnings.map((w, i) => (
+              {Array.isArray(result.warnings) && result.warnings.length > 0 && result.warnings.map((w, i) => (
                 <div key={i} className="flex gap-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                   <p className="text-[10px] text-red-200 leading-relaxed">{w}</p>
