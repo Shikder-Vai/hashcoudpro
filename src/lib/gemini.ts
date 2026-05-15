@@ -27,7 +27,13 @@ export async function getMiningOptimization(data: any) {
     }
   });
 
-  return JSON.parse(response.text);
+  try {
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("AI response parse error:", e);
+    return { optimizations: [] };
+  }
 }
 
 export async function analyzeHardwareSuitability(specs: any) {
@@ -56,5 +62,17 @@ export async function analyzeHardwareSuitability(specs: any) {
     }
   });
 
-  return JSON.parse(response.text);
+  try {
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("AI response parse error:", e);
+    return {
+      suitabilityScore: 0,
+      recommendedCoin: "None",
+      estimatedHashrate: "N/A",
+      warnings: ["Failed to analyze hardware. Please try again."],
+      setupCommand: "echo 'Error: AI analysis failed'"
+    };
+  }
 }

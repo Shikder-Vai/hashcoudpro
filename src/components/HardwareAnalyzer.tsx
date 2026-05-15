@@ -129,7 +129,7 @@ export default function HardwareAnalyzer() {
 
             {/* Warnings */}
             <div className="space-y-2">
-              {result.warnings.map((w, i) => (
+              {result.warnings && result.warnings.length > 0 && result.warnings.map((w, i) => (
                 <div key={i} className="flex gap-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                   <p className="text-[10px] text-red-200 leading-relaxed">{w}</p>

@@ -204,7 +204,7 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
-                  <div className="h-[250px] sm:h-[300px] w-full">
+                  <div className="h-[250px] sm:h-[300px] min-h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={MOCK_CHART_DATA}>
                         <defs>
