@@ -1,0 +1,6 @@
+{
+  "name": "HashCloud Pro",
+  "description": "Professional Cryptocurrency Cloud Mining & Management Dashboard with AI Optimization and Smart Contract Withdrawal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
