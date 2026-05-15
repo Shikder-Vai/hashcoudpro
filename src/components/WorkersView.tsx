@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Server, Activity, Plus } from 'lucide-react';
+import { Server, Activity, Plus, Terminal, Copy, Check } from 'lucide-react';
 import WorkerList from './WorkerList';
 
 export default function WorkersView() {
@@ -92,11 +92,30 @@ export default function WorkersView() {
             </div>
           </div>
 
-          <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
-            <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2">Technical Note</p>
-            <p className="text-gray-500 text-xs leading-relaxed">
-              Workers are identified by their unique hardware signatures. If a worker goes offline for more than 10 minutes, an automated failover protocol will redirect regional pool traffic.
-            </p>
+          <div className="bg-orange-500/5 border border-orange-500/10 p-6 rounded-2xl">
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <Terminal className="w-4 h-4 text-orange-500" />
+              XMRig Config
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Pool Host</p>
+                <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-orange-200 font-mono break-all border border-white/5">
+                  gulf.moneroocean.stream:10128
+                </code>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Algo (XMRig)</p>
+                <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-orange-200 font-mono border border-white/5">
+                  rx/0 (RandomX)
+                </code>
+              </div>
+              <div className="pt-2">
+                <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                  Ensure your wallet address here matches your miner's wallet setting to sync data.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

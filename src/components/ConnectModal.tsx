@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Wallet, Shield, X, ArrowRight } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -123,5 +124,3 @@ export default function ConnectModal({ isOpen, onClose, onConnect }: ConnectModa
     </AnimatePresence>
   );
 }
-
-import { cn } from '../lib/utils';
