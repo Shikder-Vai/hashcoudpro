@@ -90,37 +90,8 @@ async function startServer() {
 
   // Workers status endpoint
   app.get("/api/workers", (req, res) => {
-    const workers = [
-      {
-        id: "w1",
-        name: "MainRig-v3",
-        hashrate: 42.5 + Math.random() * 5,
-        status: "online",
-        lastSeen: new Date().toISOString(),
-      },
-      {
-        id: "w2",
-        name: "Laptop-G3",
-        hashrate: 12.2 + Math.random() * 2,
-        status: "online",
-        lastSeen: new Date().toISOString(),
-      },
-      {
-        id: "w3",
-        name: "ASIC-V4",
-        hashrate: 0,
-        status: "offline",
-        lastSeen: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: "w4",
-        name: "Office-Rig",
-        hashrate: 85.1 + Math.random() * 10,
-        status: "online",
-        lastSeen: new Date().toISOString(),
-      }
-    ];
-    res.json(workers);
+    // Return empty if user wants no dummy data, or keep it for structure
+    res.json([]);
   });
 
   // Vite middleware for development

@@ -109,16 +109,16 @@ export default function HardwareAnalyzer() {
                   <circle
                     cx="40" cy="40" r="34"
                     fill="transparent"
-                    stroke={result.suitabilityScore > 50 ? "#22c55e" : "#eab308"}
+                    stroke={(result.suitabilityScore || 0) > 50 ? "#22c55e" : "#eab308"}
                     strokeWidth="8"
                     strokeDasharray={213}
-                    strokeDashoffset={213 - (213 * result.suitabilityScore) / 100}
+                    strokeDashoffset={213 - (213 * (result.suitabilityScore || 0)) / 100}
                     strokeLinecap="round"
                     className="transition-all duration-1000"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">{result.suitabilityScore}%</span>
+                  <span className="text-white font-bold text-lg">{(result.suitabilityScore || 0)}%</span>
                 </div>
               </div>
               <div>

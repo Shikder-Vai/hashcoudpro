@@ -17,7 +17,7 @@ export async function getMiningOptimization(data: any) {
   if (!ai) throw new Error("Gemini API key not configured");
   
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-1.5-flash",
     contents: `As a crypto mining expert AI, analyze the following mining statistics and provide 3 actionable optimization tips:
     ${JSON.stringify(data)}
     
@@ -40,7 +40,7 @@ export async function analyzeHardwareSuitability(specs: any) {
   if (!ai) throw new Error("Gemini API key not configured");
   
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-1.5-flash",
     contents: `As a mining hardware expert, analyze this PC configuration for cryptocurrency mining suitability:
     System: ${specs.systemModel}
     CPU: ${specs.processor}
