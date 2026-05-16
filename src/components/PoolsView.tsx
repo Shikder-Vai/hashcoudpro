@@ -129,7 +129,11 @@ export default function PoolsView() {
                          -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
                        </div>
                        <div className="border-t border-[#2A2D35] pt-2">
-                         <p className="text-[8px] text-emerald-600 mb-1">SSL Port (20128) - More Stable:</p>
+                         <p className="text-[8px] text-emerald-600 mb-1 font-bold">Recommended: SSL Port (443) - Bypasses ISP Blocks:</p>
+                         -o gulf.moneroocean.stream:443 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1 --tls
+                       </div>
+                       <div className="border-t border-[#2A2D35] pt-2">
+                         <p className="text-[8px] text-blue-600 mb-1">Alternative SSL (20128):</p>
                          -o gulf.moneroocean.stream:20128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1 --tls
                        </div>
                     </div>

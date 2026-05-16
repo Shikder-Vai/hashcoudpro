@@ -449,15 +449,14 @@ export default function Dashboard() {
                     </div>
                     <div className="mt-4 p-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
                       <p className="text-[10px] text-orange-500 font-bold mb-1 uppercase">Terminal Troubleshooting:</p>
-                      <p className="text-[10px] text-gray-500 leading-relaxed mb-1">
-                        If you see <span className="text-red-500">"end of file"</span> or <span className="text-red-500">"connection reset"</span>, your ISP may be blocking port 10128.
+                      <p className="text-[10px] text-gray-400 leading-relaxed mb-1">
+                        If you see <span className="text-red-500 font-bold">"end of file"</span> or <span className="text-red-500 font-bold">"connection reset"</span>:
                       </p>
-                      <p className="text-[10px] text-emerald-500 font-bold mb-2">
-                        Try adding <span className="text-emerald-400 font-mono">--tls</span> and changing port to <span className="text-emerald-400 font-mono">20128</span>.
-                      </p>
-                      <p className="text-[10px] text-gray-500 leading-relaxed mb-2">
-                        Wait for the <span className="text-green-500 font-mono">"net: accepted share"</span> message. Stats will remain 0 until it appears.
-                      </p>
+                      <ul className="text-[9px] text-gray-500 list-disc ml-4 mb-2 space-y-1">
+                        <li>Your ISP is likely blocking the default port (10128).</li>
+                        <li>Switch to <span className="text-emerald-500 font-bold">Port 443</span> which uses SSL and often bypasses blocks.</li>
+                        <li>Use the <span className="text-emerald-500 font-mono">--tls</span> flag in your command.</li>
+                      </ul>
                       <p className="text-[9px] text-gray-600 italic">
                         Note: Pool updates can lag by 5-10 minutes even after shares are accepted.
                       </p>
