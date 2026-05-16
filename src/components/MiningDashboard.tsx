@@ -89,11 +89,24 @@ export default function Dashboard() {
         const workers = await getRealWorkerList(walletAddress);
         setLastError(null);
         
+        const activeCount = minerData.activeWorkers || (Array.isArray(workers) ? workers.filter(w => w.status === 'online').length : 0);
+        
+        // Prioritize hashrate from miner stats, fallback to worker sum, then to any performance key
+        let totalHashrate = minerData.hashrate || 0;
+        if (totalHashrate === 0 && Array.isArray(workers)) {
+          totalHashrate = workers.reduce((acc, w) => acc + (w.hashrate || 0), 0);
+        }
+        
+        // Last-ditch: if we have performance data but no aggregate hashrate
+        if (totalHashrate === 0 && minerData.performance) {
+          totalHashrate = Object.values(minerData.performance).reduce((acc: number, p: any) => acc + (p.hashrate || p.h || 0), 0);
+        }
+
         setStats({
-          hashrate: minerData.hashrate || 0,
-          activeWorkers: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length : 0,
-          efficiency: minerData.hashrate > 0 ? 100 : 0,
-          powerUsage: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length * 150 : 0,
+          hashrate: totalHashrate,
+          activeWorkers: activeCount,
+          efficiency: totalHashrate > 0 ? 100 : 0,
+          powerUsage: activeCount > 0 ? activeCount * 150 : (totalHashrate > 0 ? 150 : 0),
           balance: minerData.balance || 0,
           totalHashes: minerData.totalHashes || 0
         });
@@ -238,8 +251,8 @@ export default function Dashboard() {
               <StatCard 
                 icon={<Activity className="text-orange-500" />} 
                 label="Total Hashrate" 
-                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : stats.totalHashes > 0 ? "CALCULATING..." : "POOL SYNCHRONIZING..."} 
-                trend={stats.hashrate > 0 ? "Live" : "Pending"} 
+                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : stats.totalHashes > 0 ? (stats.activeWorkers > 0 ? "DETECTING..." : "POOL UPDATE LAG") : "POOL SYNCHRONIZING..."} 
+                trend={stats.hashrate > 0 ? "Live" : (stats.activeWorkers > 0 ? "Detecting" : "Pending")} 
                 isPositive={stats.hashrate > 0}
                 subValue={stats.hashrate > 0 || stats.totalHashes > 0 ? `Total Hashes: ${stats.totalHashes?.toLocaleString() || 0}` : "Waiting for first share..."}
               />
@@ -295,16 +308,14 @@ export default function Dashboard() {
                           </button>
                         ))}
                       </div>
-                      {walletAddress && (
-                        <a 
-                          href={`https://moneroocean.stream/#/dashboard?addr=${walletAddress}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[9px] bg-orange-500/10 text-orange-500 px-2 py-1 rounded border border-orange-500/20 hover:bg-orange-500/20 transition-all font-bold uppercase tracking-wider"
-                        >
-                          Check Official Pool Stats ↗
-                        </a>
-                      )}
+                      <a 
+                        href={`https://moneroocean.stream/#/dashboard?addr=${walletAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[9px] text-orange-500 hover:underline font-bold uppercase tracking-wider bg-orange-500/5 px-2 py-1 rounded border border-orange-500/10"
+                      >
+                        CHECK OFFICIAL POOL STATS ↗
+                      </a>
                     </div>
                   </div>
                   <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: 300 }}>

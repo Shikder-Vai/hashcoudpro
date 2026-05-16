@@ -137,7 +137,11 @@ async function startServer() {
     try {
       const { address } = req.params;
       console.log(`[Proxy] Fetching stats for ${address}...`);
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`);
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
       
       if (!response.ok) {
         const errorText = await response.text().catch(() => "No error body");
@@ -157,7 +161,11 @@ async function startServer() {
   app.get("/api/pool/workers/:address", async (req, res) => {
     try {
       const { address } = req.params;
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`);
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
       
       if (!response.ok) {
         const errorText = await response.text().catch(() => "No error body");

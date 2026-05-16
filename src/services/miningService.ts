@@ -5,6 +5,7 @@ export interface MinerStats {
   totalHashes: number;
   activeWorkers: number;
   lastShare: number;
+  performance?: any;
 }
 
 export async function getRealMinerStats(address: string): Promise<MinerStats> {
@@ -31,11 +32,12 @@ export async function getRealMinerStats(address: string): Promise<MinerStats> {
     }
 
     return {
-      hashrate: finalData.hashrate || finalData.hashratePay || finalData.hashrateRaw || 0,
-      balance: (finalData.amtDue || 0) / 1000000000000,
-      totalHashes: finalData.hashes || finalData.totalHashes || 0,
-      activeWorkers: 0,
-      lastShare: finalData.lastShare || 0
+      hashrate: finalData.payHashrate || finalData.hashrate || finalData.hashratePay || finalData.hashrateRaw || finalData.hashrate_1h || 0,
+      balance: (finalData.amtDue || finalData.balance || finalData.amount_due || 0) / 1000000000000,
+      totalHashes: finalData.hashes || finalData.totalHashes || finalData.total_hashes || 0,
+      activeWorkers: finalData.performance ? Object.keys(finalData.performance).length : 0,
+      lastShare: finalData.lastShare || finalData.last_share || 0,
+      performance: finalData.performance // Pass through performance data
     };
   } catch (e) {
     console.error("Failed to fetch real miner stats:", e);
@@ -45,23 +47,70 @@ export async function getRealMinerStats(address: string): Promise<MinerStats> {
 
 export async function getRealWorkerList(address: string) {
   try {
-    const response = await fetch(`/api/pool/workers/${address}`);
-    if (!response.ok) return [];
-    const data = await response.json();
-    
-    if (!Array.isArray(data)) return [];
+    // 1. Fetch stats first because it contains richer info in 'performance'
+    const statsRes = await fetch(`/api/pool/stats/${address}`);
+    let performance: any = null;
+    if (statsRes.ok) {
+      const statsJson = await statsRes.json();
+      performance = (statsJson.stats || statsJson).performance;
+    }
 
-    return data.map((w: any) => {
-      const identifier = typeof w === 'string' ? w : w.identifier || 'unknown';
+    // 2. Fetch identifiers list
+    const response = await fetch(`/api/pool/workers/${address}`);
+    const identifiers = response.ok ? await response.json() : [];
+    
+    // 3. Map performance data if available
+    if (performance && typeof performance === 'object') {
+      const workers = Object.entries(performance).map(([id, stats]: [string, any]) => {
+        const hashrate = stats.hashrate || stats.h || 0;
+        const lastShare = stats.lastShare || stats.last_share || stats.ts || 0;
+        
+        return {
+          id,
+          name: id,
+          hashrate: Number(hashrate),
+          status: (lastShare && (Date.now() / 1000) - lastShare < 1800) ? 'online' : 'offline',
+          lastSeen: (lastShare && lastShare > 0) ? new Date(lastShare * 1000).toISOString() : null
+        };
+      });
+
+      // Add identifiers that might not be in the performance window
+      if (Array.isArray(identifiers)) {
+        identifiers.forEach((id: any) => {
+          const name = typeof id === 'string' ? id : (id.identifier || id.id);
+          if (name && !workers.find(w => w.id === name)) {
+            workers.push({
+              id: name,
+              name: name,
+              hashrate: 0,
+              status: 'offline',
+              lastSeen: null
+            });
+          }
+        });
+      }
+      return workers;
+    }
+
+    // Fallback if no performance data
+    if (!Array.isArray(identifiers)) return [];
+
+    return identifiers.map((w: any) => {
+      const identifier = typeof w === 'string' ? w : w.identifier || w.id || 'unknown';
       const hashrate = typeof w === 'string' ? 0 : w.hashrate || 0;
-      const lastShare = typeof w === 'string' ? 0 : w.lastShare || 0;
+      let lastShare = typeof w === 'string' ? 0 : w.lastShare || w.last_share || 0;
+      
+      if (typeof lastShare !== 'number') {
+        const parsed = parseInt(String(lastShare));
+        lastShare = isNaN(parsed) ? 0 : parsed;
+      }
       
       return {
         id: identifier,
         name: identifier,
         hashrate: hashrate,
-        status: (Date.now() / 1000) - lastShare < 600 ? 'online' : 'offline',
-        lastSeen: lastShare ? new Date(lastShare * 1000).toISOString() : 'Waiting...'
+        status: lastShare && (Date.now() / 1000) - lastShare < 1200 ? 'online' : 'offline',
+        lastSeen: (lastShare && lastShare > 0) ? new Date(lastShare * 1000).toISOString() : null
       };
     });
   } catch (e) {
