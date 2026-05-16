@@ -74,6 +74,22 @@ export default function WorkerList() {
             <Activity className="w-8 h-8 text-orange-500 animate-pulse mb-3" />
             <p className="text-xs text-gray-500 uppercase tracking-widest">Bridging nodes...</p>
           </div>
+        ) : workers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
+            <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center mb-4">
+              <SignalLow className="w-6 h-6 text-orange-500" />
+            </div>
+            <h4 className="text-white text-sm font-bold mb-2">No Active Workers Found</h4>
+            <p className="text-xs text-gray-500 leading-relaxed max-w-[200px]">
+              Mining stats will appear once your miner (XMRig) submits its first <span className="text-orange-500 font-bold">Accepted</span> share. This usually takes 5-10 minutes.
+            </p>
+            <div className="mt-4 p-3 bg-black/40 border border-[#2A2D35] rounded-lg w-full text-left">
+              <p className="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Watch for this in XMRig:</p>
+              <div className="font-mono text-[10px] text-green-500 bg-black/50 p-2 rounded">
+                net: accepted share ...
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             {workers.map((worker) => (

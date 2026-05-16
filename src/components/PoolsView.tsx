@@ -112,6 +112,24 @@ export default function PoolsView() {
               {switchingId === pool.id ? "Authenticating..." : connectedId === pool.id ? "Current Active Pool" : "Switch Pool"}
               <ArrowUpRight className="w-4 h-4" />
             </button>
+
+            {connectedId === pool.id && (
+              <div className="mt-4 p-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">XMRig Connection Detail</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-[9px] text-gray-600 uppercase">Pool Address</p>
+                    <code className="text-xs text-orange-300 font-mono">gulf.moneroocean.stream:10128</code>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-gray-600 uppercase">Your Config Flag</p>
+                    <div className="bg-black/40 p-2 rounded border border-[#2A2D35] text-[10px] font-mono text-gray-400 break-all">
+                      -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

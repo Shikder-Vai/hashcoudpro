@@ -137,9 +137,15 @@ async function startServer() {
     try {
       const { address } = req.params;
       const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`);
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Pool API error", status: response.status });
+      }
+      
       const data = await response.json();
       res.json(data);
     } catch (error) {
+      console.error("Pool stats proxy error:", error);
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   });
@@ -149,9 +155,16 @@ async function startServer() {
     try {
       const { address } = req.params;
       const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`);
+      
+      if (!response.ok) {
+        if (response.status === 404) return res.json([]); // No workers yet
+        return res.status(response.status).json({ error: "Pool API error", status: response.status });
+      }
+
       const data = await response.json();
       res.json(data);
     } catch (error) {
+      console.error("Pool workers proxy error:", error);
       res.status(500).json({ error: "Failed to fetch workers" });
     }
   });

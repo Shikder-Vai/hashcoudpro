@@ -31,6 +31,7 @@ export default function Dashboard() {
     efficiency: 0,
     powerUsage: 0,
     balance: 0,
+    totalHashes: 0,
   });
 
   const [prices, setPrices] = React.useState<any>(null);
@@ -77,7 +78,7 @@ export default function Dashboard() {
     
     const fetchStats = async () => {
       if (!walletAddress) {
-        setStats({ hashrate: 0, activeWorkers: 0, efficiency: 0, powerUsage: 0, balance: 0 });
+        setStats({ hashrate: 0, activeWorkers: 0, efficiency: 0, powerUsage: 0, balance: 0, totalHashes: 0 });
         return;
       }
 
@@ -90,7 +91,8 @@ export default function Dashboard() {
           activeWorkers: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length : 0,
           efficiency: minerData.hashrate > 0 ? 100 : 0,
           powerUsage: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length * 150 : 0,
-          balance: minerData.balance || 0
+          balance: minerData.balance || 0,
+          totalHashes: minerData.totalHashes || 0
         });
       } catch (e) { 
         console.error("Real data fetch failed:", e); 
@@ -232,15 +234,16 @@ export default function Dashboard() {
               <StatCard 
                 icon={<Activity className="text-orange-500" />} 
                 label="Total Hashrate" 
-                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : "P00L SYNCING..."} 
-                trend={stats.hashrate > 0 ? "Live" : "Waiting"} 
+                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : "P00L SYNCHRONIZING..."} 
+                trend={stats.hashrate > 0 ? "Live" : "Pending"} 
                 isPositive={stats.hashrate > 0}
+                subValue={stats.hashrate > 0 ? `Total Hashes: ${stats.totalHashes?.toLocaleString() || 0}` : "Waiting for first share..."}
               />
               <StatCard 
                 icon={<Server className="text-blue-500" />} 
                 label="Active Workers" 
                 value={stats.activeWorkers.toString()} 
-                subValue={stats.activeWorkers > 0 ? "Mining Active" : "Searching Identifiers..."}
+                subValue={stats.activeWorkers > 0 ? "Mining Active" : "Miner not detected yet"}
               />
               <StatCard 
                 icon={<Zap className="text-yellow-500" />} 
@@ -350,62 +353,74 @@ export default function Dashboard() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
             >
-              <div className="md:col-span-2 bg-orange-500/5 border border-orange-500/10 p-6 rounded-2xl">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Shield className="w-6 h-6 text-orange-500" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-white font-semibold text-sm uppercase tracking-wider">Hashrate Sync Troubleshooting</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      If your miner is running but stats show 0, please check the following:
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-[11px] text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                        <span>Pool needs 5-10 minutes to register new miners.</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                        <span>Verify your wallet address matches your miner's -u flag.</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                        <span>Check XMRig logs for "Accepted" shares.</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                        <span>Ensure port 10128 is not blocked by your firewall.</span>
-                      </div>
-                    </div>
-                  </div>
+              <div className="lg:col-span-2 bg-[#0D0E12] border border-[#1E2128] p-6 rounded-2xl">
+                <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-orange-500" />
+                  Mining Initialization Progress
+                </h3>
+                
+                <div className="relative flex flex-col gap-8 ml-4">
+                  <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-[#1E2128]" />
+                  
+                  <Step 
+                    active={!!walletAddress} 
+                    done={!!walletAddress} 
+                    title="Wallet Connected" 
+                    desc={`Linked to ${walletAddress?.substring(0, 8)}...`} 
+                  />
+                  <Step 
+                    active={!!walletAddress} 
+                    done={!!walletAddress} 
+                    title="Pool Handshake" 
+                    desc="MoneroOcean Global Node (10128) selected" 
+                  />
+                  <Step 
+                    active={!!walletAddress && stats.hashrate === 0} 
+                    done={stats.hashrate > 0} 
+                    title="Miner Integration" 
+                    desc={stats.hashrate > 0 ? "Connectivity Stable" : "Waiting for 'Accepted Share' in XMRig terminal..."} 
+                  />
+                  <Step 
+                    active={stats.hashrate > 0} 
+                    done={stats.balance > 0} 
+                    title="First Share Reward" 
+                    desc={stats.balance > 0 ? "First reward confirmed" : "Verification usually takes 15-30 minutes"} 
+                  />
                 </div>
               </div>
 
-              <div className="bg-[#0D0E12] border border-[#1E2128] p-6 rounded-2xl">
-                <h3 className="text-gray-400 font-semibold mb-4 text-[10px] uppercase tracking-widest flex items-center justify-between">
-                  API Connectivity
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-gray-500">MoneroOcean</span>
-                    <span className="text-gray-300">Connected</span>
+              <div className="bg-[#0D0E12] border border-[#1E2128] p-6 rounded-2xl flex flex-col justify-between">
+                <div>
+                  <h3 className="text-gray-400 font-semibold mb-4 text-[10px] uppercase tracking-widest flex items-center justify-between">
+                    API Connectivity
+                    <div className={cn("w-2 h-2 rounded-full animate-pulse", walletAddress ? "bg-green-500" : "bg-gray-700")} />
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-500">MoneroOcean</span>
+                      <span className={walletAddress ? "text-green-500" : "text-gray-500"}>{walletAddress ? "Connected" : "Standby"}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-500">Sync Frequency</span>
+                      <span className="text-gray-300">30s Real-time</span>
+                    </div>
+                    <div className="mt-4 p-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
+                      <p className="text-[10px] text-orange-500 font-bold mb-1 uppercase">Terminal Warning:</p>
+                      <p className="text-[10px] text-gray-500 leading-relaxed">
+                        Wait for the <span className="text-green-500 font-mono">"net: accepted share"</span> message in your XMRig window. Stats will remain 0 until that specific message appears.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-gray-500">Latency</span>
-                    <span className="text-gray-300">124ms</span>
-                  </div>
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="w-full mt-2 py-2 bg-[#151619] hover:bg-[#1E2128] border border-[#2A2D35] rounded-xl text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    Force Sync
-                  </button>
                 </div>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="w-full mt-6 py-3 bg-[#151619] hover:bg-[#1E2128] border border-[#2A2D35] rounded-xl text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Force Pool Re-Sync
+                </button>
               </div>
             </motion.div>
           </>
@@ -432,6 +447,23 @@ export default function Dashboard() {
         onClose={() => setIsConnectModalOpen(false)}
         onConnect={handleConnect}
       />
+    </div>
+  );
+}
+
+function Step({ active, done, title, desc }: { active: boolean, done: boolean, title: string, desc: string }) {
+  return (
+    <div className="flex gap-4 items-start relative z-10">
+      <div className={cn(
+        "w-4 h-4 rounded-full border-2 mt-1 transition-all flex items-center justify-center",
+        done ? "bg-orange-500 border-orange-500" : active ? "bg-[#0D0E12] border-orange-500 animate-pulse" : "bg-[#0D0E12] border-[#1E2128]"
+      )}>
+        {done && <Activity className="w-2 h-2 text-white fill-current" />}
+      </div>
+      <div>
+        <h4 className={cn("text-xs font-bold uppercase tracking-wider", done ? "text-white" : active ? "text-orange-500" : "text-gray-600")}>{title}</h4>
+        <p className="text-[10px] text-gray-500 font-mono mt-0.5">{desc}</p>
+      </div>
     </div>
   );
 }
