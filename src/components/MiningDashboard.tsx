@@ -77,7 +77,7 @@ export default function Dashboard() {
     
     const fetchStats = async () => {
       if (!walletAddress) {
-        setStats({ hashrate: 0, activeWorkers: 0, efficiency: 0, powerUsage: 0 });
+        setStats({ hashrate: 0, activeWorkers: 0, efficiency: 0, powerUsage: 0, balance: 0 });
         return;
       }
 
@@ -85,16 +85,16 @@ export default function Dashboard() {
         const minerData = await getRealMinerStats(walletAddress);
         const workers = await getRealWorkerList(walletAddress);
         
-        if (minerData) {
-          setStats({
-            hashrate: minerData.hashrate,
-            activeWorkers: workers.filter(w => w.status === 'online').length,
-            efficiency: 98.4,
-            powerUsage: workers.filter(w => w.status === 'online').length * 150,
-            balance: minerData.balance
-          });
-        }
-      } catch (e) { console.error("Real data fetch failed:", e); }
+        setStats({
+          hashrate: minerData.hashrate || 0,
+          activeWorkers: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length : 0,
+          efficiency: minerData.hashrate > 0 ? 100 : 0,
+          powerUsage: Array.isArray(workers) ? workers.filter(w => w.status === 'online').length * 150 : 0,
+          balance: minerData.balance || 0
+        });
+      } catch (e) { 
+        console.error("Real data fetch failed:", e); 
+      }
     };
 
     fetchPrices();
@@ -232,15 +232,15 @@ export default function Dashboard() {
               <StatCard 
                 icon={<Activity className="text-orange-500" />} 
                 label="Total Hashrate" 
-                value={formatHashrate(stats.hashrate)} 
-                trend="Live" 
-                isPositive={true}
+                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : "P00L SYNCING..."} 
+                trend={stats.hashrate > 0 ? "Live" : "Waiting"} 
+                isPositive={stats.hashrate > 0}
               />
               <StatCard 
                 icon={<Server className="text-blue-500" />} 
                 label="Active Workers" 
                 value={stats.activeWorkers.toString()} 
-                subValue={stats.activeWorkers > 0 ? "Mining Active" : "Waiting for shares..."}
+                subValue={stats.activeWorkers > 0 ? "Mining Active" : "Searching Identifiers..."}
               />
               <StatCard 
                 icon={<Zap className="text-yellow-500" />} 

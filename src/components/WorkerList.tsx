@@ -27,16 +27,7 @@ export default function WorkerList() {
 
       // Fetch real pool workers
       const realWorkers = await getRealWorkerList(walletAddress);
-      
-      // Merge with local server workers if they exist, or just use real ones
-      const res = await fetch('/api/workers');
-      if (res.ok) {
-        const localWorkers = await res.json();
-        const allWorkers = [...realWorkers, ...localWorkers.filter((lw: any) => !realWorkers.find(rw => rw.id === lw.id))];
-        setWorkers(allWorkers);
-      } else {
-        setWorkers(realWorkers);
-      }
+      setWorkers(realWorkers);
     } catch (e) {
       console.error(e);
     } finally {

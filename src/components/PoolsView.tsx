@@ -118,11 +118,15 @@ export default function PoolsView() {
 
       <div className="p-6 bg-orange-500/5 border border-orange-500/10 rounded-2xl flex gap-4">
         <Shield className="w-6 h-6 text-orange-500 shrink-0" />
-        <div>
+        <div className="space-y-1">
           <h4 className="text-orange-500 font-bold text-sm">Pool Safety Protocol</h4>
-          <p className="text-gray-500 text-xs leading-relaxed mt-1">
-            HashCloud Pro automatically verifies pool certificates and stratum connections. Switching pools may take up to 5 minutes for hashrate normalization.
+          <p className="text-gray-500 text-xs leading-relaxed">
+            HashCloud Pro simplifies pool monitoring. When switching, ensure your local miner (XMRig) is updated with the new pool address.
           </p>
+          <div className="pt-2 flex items-center gap-2 text-orange-500/80 text-[10px] font-bold uppercase tracking-widest">
+            <Zap className="w-3 h-3" />
+            Normalization takes 5-10 minutes
+          </div>
         </div>
       </div>
     </motion.div>
