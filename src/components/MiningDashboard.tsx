@@ -57,30 +57,19 @@ export default function Dashboard() {
   React.useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero,bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
-        if (!res.ok) throw new Error("Gecko error");
-        const data = await res.json();
-        setPrices({
-          XMR: data.monero?.usd || 0,
-          BTC: data.bitcoin?.usd || 0,
-          ETH: data.ethereum?.usd || 0,
-          raw: data
-        });
-      } catch (e) { 
-        console.error("Coingecko fetch failed, falling back to local api:", e);
-        try {
-          const res = await fetch('/api/prices');
-          if (res.ok) {
-            const data = await res.json();
-            // Local API might use uppercase keys
-            setPrices({
-              XMR: data.XMR || data.monero || 150.50,
-              BTC: data.BTC || data.bitcoin || 64000,
-              ETH: data.ETH || data.ethereum || 3400,
-              LTC: data.LTC || 85
-            });
-          }
-        } catch (err) { console.error(err); }
+        const res = await fetch('/api/prices');
+        if (res.ok) {
+          const data = await res.json();
+          setPrices({
+            XMR: data.XMR || data.monero || 150.50,
+            BTC: data.BTC || data.bitcoin || 64000,
+            ETH: data.ETH || data.ethereum || 3400,
+            LTC: data.LTC || 85,
+            raw: data // Keep raw in case it's used elsewhere
+          });
+        }
+      } catch (err) { 
+        console.error("Price fetch failed:", err); 
       }
     };
     
@@ -114,6 +103,19 @@ export default function Dashboard() {
     }, 30000); // 30s for real APIs
     return () => clearInterval(interval);
   }, [walletAddress]);
+
+  const formatHashrate = (h: number) => {
+    if (h >= 1000000) return `${(h / 1000000).toFixed(2)} MH/s`;
+    if (h >= 1000) return `${(h / 1000).toFixed(2)} KH/s`;
+    return `${h.toFixed(1)} H/s`;
+  };
+
+  const chartData = React.useMemo(() => {
+    return Array.from({ length: 24 }, (_, i) => ({
+      time: `${i}:00`,
+      hashrate: stats.hashrate > 0 ? (stats.hashrate * (0.9 + Math.random() * 0.2)) : 0,
+    }));
+  }, [stats.hashrate]);
 
   return (
     <div className="min-h-screen bg-[#0A0B0D] text-gray-300 font-sans selection:bg-orange-500/30">
@@ -227,15 +229,15 @@ export default function Dashboard() {
               <StatCard 
                 icon={<Activity className="text-orange-500" />} 
                 label="Total Hashrate" 
-                value={`${(stats.hashrate || 0).toFixed(1)} MH/s`} 
-                trend="0.0%" 
+                value={formatHashrate(stats.hashrate)} 
+                trend="Live" 
                 isPositive={true}
               />
               <StatCard 
                 icon={<Server className="text-blue-500" />} 
                 label="Active Workers" 
                 value={stats.activeWorkers.toString()} 
-                subValue="Initialize mining..."
+                subValue={stats.activeWorkers > 0 ? "Mining Active" : "Waiting for shares..."}
               />
               <StatCard 
                 icon={<Zap className="text-yellow-500" />} 
@@ -277,7 +279,7 @@ export default function Dashboard() {
                   </div>
                   <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: 300 }}>
                     <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                      <AreaChart data={MOCK_CHART_DATA}>
+                      <AreaChart data={chartData}>
                         <defs>
                           <linearGradient id="colorH" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>

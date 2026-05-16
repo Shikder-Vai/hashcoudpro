@@ -9,7 +9,7 @@ export interface MinerStats {
 
 export async function getRealMinerStats(address: string): Promise<MinerStats | null> {
   try {
-    const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`);
+    const response = await fetch(`/api/pool/stats/${address}`);
     if (!response.ok) return null;
     const data = await response.json();
     
@@ -29,7 +29,7 @@ export async function getRealMinerStats(address: string): Promise<MinerStats | n
 
 export async function getRealWorkerList(address: string) {
   try {
-    const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`);
+    const response = await fetch(`/api/pool/workers/${address}`);
     if (!response.ok) return [];
     const data = await response.json();
     return data.map((w: any) => ({

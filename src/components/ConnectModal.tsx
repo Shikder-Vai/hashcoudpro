@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, Shield, X, ArrowRight } from 'lucide-react';
+import { Wallet, Shield, X, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { BrowserProvider } from 'ethers';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -12,12 +13,38 @@ interface ConnectModalProps {
 export default function ConnectModal({ isOpen, onClose, onConnect }: ConnectModalProps) {
   const [address, setAddress] = React.useState('');
   const [selectedSymbol, setSelectedSymbol] = React.useState('XMR');
+  const [isConnecting, setIsConnecting] = React.useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (address.trim()) {
       onConnect(address.trim(), selectedSymbol);
       onClose();
+    }
+  };
+
+  const handleWeb3Connect = async () => {
+    if (!window.ethereum) {
+      alert("Please install Trust Wallet or MetaMask to use this feature.");
+      return;
+    }
+
+    try {
+      setIsConnecting(true);
+      const provider = new BrowserProvider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      
+      if (accounts.length > 0) {
+        setAddress(accounts[0]);
+        // Default to ETH or BNB if it looks like an EVM address
+        if (accounts[0].startsWith('0x')) {
+          setSelectedSymbol('ETH');
+        }
+      }
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -63,6 +90,36 @@ export default function ConnectModal({ isOpen, onClose, onConnect }: ConnectModa
             <div className="p-6 space-y-6">
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
+                  Connect Method
+                </label>
+                <button
+                  onClick={handleWeb3Connect}
+                  disabled={isConnecting}
+                  className="w-full bg-[#1C1E23] hover:bg-[#252830] border border-[#2A2D35] text-white p-4 rounded-xl flex items-center justify-between group transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      {isConnecting ? (
+                        <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                      ) : (
+                        <Shield className="w-4 h-4 text-blue-500" />
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold">Direct Wallet Link</p>
+                      <p className="text-[9px] text-gray-500">Trust Wallet, MetaMask, Rabby</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-white transition-colors" />
+                </button>
+
+                <div className="relative py-2 flex items-center">
+                  <div className="flex-grow border-t border-[#2A2D35]"></div>
+                  <span className="flex-shrink mx-4 text-[9px] text-gray-700 uppercase font-bold">Or Manual Entry</span>
+                  <div className="flex-grow border-t border-[#2A2D35]"></div>
+                </div>
+
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
                   Select Mining Asset
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -82,6 +139,12 @@ export default function ConnectModal({ isOpen, onClose, onConnect }: ConnectModa
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
+                <p className="text-[10px] text-red-400 leading-tight">
+                  <span className="font-bold">Important:</span> MoneroOcean pool requires a <span className="underline">Monero (XMR) address</span> as your username, even if you want to be paid in {selectedSymbol}.
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Server, Activity, Plus, Terminal, Copy, Check } from 'lucide-react';
+import { Server, Activity, Plus, Terminal, Copy, Check, Shield } from 'lucide-react';
 import WorkerList from './WorkerList';
 
 export default function WorkersView() {
@@ -127,8 +127,43 @@ export default function WorkersView() {
                 <p className="text-[10px] text-gray-400 leading-relaxed italic">
                   {walletSymbol === 'XMR' 
                     ? "Mining directly to your Monero wallet." 
-                    : `Mining RandomX. MoneroOcean will pay you in ${walletSymbol}.`}
+                    : `Mining RandomX. MoneroOcean will pay you in ${walletSymbol} (requires XMR ID).`}
                 </p>
+              </div>
+
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                <div className="flex gap-2">
+                  <Shield className="w-4 h-4 text-yellow-500 shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-yellow-200 font-bold uppercase">Performance Tip</p>
+                    <p className="text-[10px] text-yellow-500/80 leading-tight">
+                      Run XMRig as <span className="text-white font-bold underline">Administrator</span> to enable MSR Mods. This can increase your hashrate by up to 20-30%.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-red-500/5 border border-red-500/10 p-6 rounded-2xl md:col-span-2">
+            <h3 className="text-red-400 font-semibold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <Shield className="w-4 h-4" />
+              Fixing "Invalid payment address" Error
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <p className="text-xs text-gray-300 font-medium">কেন এই সমস্যাটি হচ্ছে?</p>
+                <p className="text-[11px] text-gray-500 leading-relaxed">
+                  আপনি সম্ভবত একটি Ethereum (0x...) বা Bitcoin অ্যাড্রেস ব্যবহার করছেন। MoneroOcean পুলে মাইনিং করতে চাইলে ইউজারনেম হিসেবে অবশ্যই একটি <span className="text-orange-500 font-bold">Monero (XMR)</span> অ্যাড্রেস দিতে হবে। মোনেরো অ্যাড্রেস সাধারণত ৯৫ অক্ষরের হয়।
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-gray-300 font-medium">সমাধান কী?</p>
+                <ol className="text-[11px] text-gray-500 list-decimal ml-4 space-y-1">
+                  <li>একটি Monero (XMR) ওয়ালেট তৈরি করুন (যেমন Cake Wallet বা GUI Wallet)।</li>
+                  <li>আমাদের সফটওয়্যারের 'Connect Wallet' অপশনে গিয়ে সেই <span className="text-white">XMR অ্যাড্রেসটি</span> দিন।</li>
+                  <li>তারপর XMRig আবার রান করুন, এররটি চলে যাবে।</li>
+                </ol>
               </div>
             </div>
           </div>

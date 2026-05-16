@@ -144,7 +144,9 @@ export default function WorkerList() {
                     "text-xs font-mono font-bold",
                     worker.status === 'online' ? "text-orange-500" : "text-gray-600"
                   )}>
-                    {(worker.hashrate || 0).toFixed(2)} MH/s
+                    {worker.hashrate >= 1000000 ? `${(worker.hashrate / 1000000).toFixed(2)} MH/s` :
+                     worker.hashrate >= 1000 ? `${(worker.hashrate / 1000).toFixed(2)} KH/s` :
+                     `${worker.hashrate.toFixed(1)} H/s`}
                   </div>
                 </div>
               </motion.div>

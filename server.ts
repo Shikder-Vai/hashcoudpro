@@ -79,13 +79,18 @@ async function startServer() {
 // Real crypto prices from public API (fallback to simulation if API fails)
   app.get("/api/prices", async (req, res) => {
     try {
-      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero,litecoin&vs_currencies=usd");
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero,litecoin&vs_currencies=usd&include_24hr_change=true");
       if (!response.ok) throw new Error("Gecko API error");
       const data = await response.json();
       res.json({
         monero: data.monero?.usd || 150.25,
+        monero_24h_change: data.monero?.usd_24h_change || 0,
         bitcoin: data.bitcoin?.usd || 64000,
+        bitcoin_24h_change: data.bitcoin?.usd_24h_change || 0,
         ethereum: data.ethereum?.usd || 3400,
+        ethereum_24h_change: data.ethereum?.usd_24h_change || 0,
+        litecoin: data.litecoin?.usd || 85,
+        litecoin_24h_change: data.litecoin?.usd_24h_change || 0,
         XMR: data.monero?.usd || 150.25,
         BTC: data.bitcoin?.usd || 64000,
         ETH: data.ethereum?.usd || 3400,
@@ -124,6 +129,30 @@ async function startServer() {
     } catch (error: any) {
       console.error("AI optimization error:", error);
       res.status(500).json({ error: error.message || "Internal Server Error" });
+    }
+  });
+
+  // MoneroOcean Proxy for stats
+  app.get("/api/pool/stats/:address", async (req, res) => {
+    try {
+      const { address } = req.params;
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // MoneroOcean Proxy for workers
+  app.get("/api/pool/workers/:address", async (req, res) => {
+    try {
+      const { address } = req.params;
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch workers" });
     }
   });
 
