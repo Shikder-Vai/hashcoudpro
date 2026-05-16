@@ -40,6 +40,8 @@ export default function Dashboard() {
   const [walletAddress, setWalletAddress] = React.useState<string | null>(() => {
     return localStorage.getItem('wallet_address');
   });
+  const [apiUrl, setApiUrl] = React.useState<string | null>(null);
+  const [lastError, setLastError] = React.useState<string | null>(null);
   const [timeframe, setTimeframe] = React.useState<'1H' | '1D' | '1W'>('1D');
 
   const connectWallet = async () => {
@@ -85,6 +87,7 @@ export default function Dashboard() {
       try {
         const minerData = await getRealMinerStats(walletAddress);
         const workers = await getRealWorkerList(walletAddress);
+        setLastError(null);
         
         setStats({
           hashrate: minerData.hashrate || 0,
@@ -94,8 +97,9 @@ export default function Dashboard() {
           balance: minerData.balance || 0,
           totalHashes: minerData.totalHashes || 0
         });
-      } catch (e) { 
+      } catch (e: any) { 
         console.error("Real data fetch failed:", e); 
+        setLastError(e.message || "Failed to reach node");
       }
     };
 
@@ -430,16 +434,29 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-gray-500">MoneroOcean</span>
-                      <span className={walletAddress ? "text-green-500" : "text-gray-500"}>{walletAddress ? "Connected" : "Standby"}</span>
+                      <span className={lastError ? "text-red-500" : (walletAddress ? "text-green-500" : "text-gray-500")}>
+                        {lastError ? "API Error" : (walletAddress ? "Connected" : "Standby")}
+                      </span>
                     </div>
+                    {lastError && (
+                      <div className="text-[8px] text-red-500/80 font-mono bg-red-500/5 p-1 rounded border border-red-500/10">
+                        {lastError}
+                      </div>
+                    )}
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-gray-500">Sync Frequency</span>
                       <span className="text-gray-300">30s Real-time</span>
                     </div>
                     <div className="mt-4 p-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
-                      <p className="text-[10px] text-orange-500 font-bold mb-1 uppercase">Terminal Warning:</p>
+                      <p className="text-[10px] text-orange-500 font-bold mb-1 uppercase">Terminal Troubleshooting:</p>
+                      <p className="text-[10px] text-gray-500 leading-relaxed mb-1">
+                        If you see <span className="text-red-500">"end of file"</span> or <span className="text-red-500">"connection reset"</span>, your ISP may be blocking port 10128.
+                      </p>
+                      <p className="text-[10px] text-emerald-500 font-bold mb-2">
+                        Try adding <span className="text-emerald-400 font-mono">--tls</span> and changing port to <span className="text-emerald-400 font-mono">20128</span>.
+                      </p>
                       <p className="text-[10px] text-gray-500 leading-relaxed mb-2">
-                        Wait for the <span className="text-green-500 font-mono">"net: accepted share"</span> message in your XMRig window. Stats will remain 0 until that specific message appears.
+                        Wait for the <span className="text-green-500 font-mono">"net: accepted share"</span> message. Stats will remain 0 until it appears.
                       </p>
                       <p className="text-[9px] text-gray-600 italic">
                         Note: Pool updates can lag by 5-10 minutes even after shares are accepted.

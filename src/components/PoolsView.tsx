@@ -123,8 +123,15 @@ export default function PoolsView() {
                   </div>
                   <div>
                     <p className="text-[9px] text-gray-600 uppercase">Your Config Flag</p>
-                    <div className="bg-black/40 p-2 rounded border border-[#2A2D35] text-[10px] font-mono text-gray-400 break-all">
-                      -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
+                    <div className="bg-black/40 p-2 rounded border border-[#2A2D35] text-[10px] font-mono text-gray-400 break-all space-y-2">
+                       <div>
+                         <p className="text-[8px] text-gray-600 mb-1">Standard Port (10128):</p>
+                         -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
+                       </div>
+                       <div className="border-t border-[#2A2D35] pt-2">
+                         <p className="text-[8px] text-emerald-600 mb-1">SSL Port (20128) - More Stable:</p>
+                         -o gulf.moneroocean.stream:20128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1 --tls
+                       </div>
                     </div>
                   </div>
                 </div>
