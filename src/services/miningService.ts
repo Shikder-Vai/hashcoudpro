@@ -21,18 +21,21 @@ export async function getRealMinerStats(address: string): Promise<MinerStats> {
       };
     }
     const data = await response.json();
+    console.log("Pool Stats Data:", data);
+    
+    const finalData = data.stats || data;
     
     // Check if API returned an error message in a successful response
-    if (data.error || (Object.keys(data).length === 0)) {
+    if (finalData.error || (Object.keys(finalData).length === 0)) {
        return { hashrate: 0, balance: 0, totalHashes: 0, activeWorkers: 0, lastShare: 0 };
     }
 
     return {
-      hashrate: data.hashrate || 0,
-      balance: (data.amtDue || 0) / 1000000000000,
-      totalHashes: data.hashes || 0,
+      hashrate: finalData.hashrate || finalData.hashratePay || finalData.hashrateRaw || 0,
+      balance: (finalData.amtDue || 0) / 1000000000000,
+      totalHashes: finalData.hashes || finalData.totalHashes || 0,
       activeWorkers: 0,
-      lastShare: data.lastShare || 0
+      lastShare: finalData.lastShare || 0
     };
   } catch (e) {
     console.error("Failed to fetch real miner stats:", e);
@@ -48,13 +51,19 @@ export async function getRealWorkerList(address: string) {
     
     if (!Array.isArray(data)) return [];
 
-    return data.map((w: any) => ({
-      id: w.identifier || 'unknown',
-      name: w.identifier || 'unknown',
-      hashrate: w.hashrate || 0,
-      status: (Date.now() / 1000) - (w.lastShare || 0) < 600 ? 'online' : 'offline',
-      lastSeen: w.lastShare ? new Date(w.lastShare * 1000).toISOString() : 'Never'
-    }));
+    return data.map((w: any) => {
+      const identifier = typeof w === 'string' ? w : w.identifier || 'unknown';
+      const hashrate = typeof w === 'string' ? 0 : w.hashrate || 0;
+      const lastShare = typeof w === 'string' ? 0 : w.lastShare || 0;
+      
+      return {
+        id: identifier,
+        name: identifier,
+        hashrate: hashrate,
+        status: (Date.now() / 1000) - lastShare < 600 ? 'online' : 'offline',
+        lastSeen: lastShare ? new Date(lastShare * 1000).toISOString() : 'Waiting...'
+      };
+    });
   } catch (e) {
     console.error("Failed to fetch real workers:", e);
     return [];

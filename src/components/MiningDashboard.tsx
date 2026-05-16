@@ -234,10 +234,10 @@ export default function Dashboard() {
               <StatCard 
                 icon={<Activity className="text-orange-500" />} 
                 label="Total Hashrate" 
-                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : "P00L SYNCHRONIZING..."} 
+                value={stats.hashrate > 0 ? formatHashrate(stats.hashrate) : stats.totalHashes > 0 ? "CALCULATING..." : "POOL SYNCHRONIZING..."} 
                 trend={stats.hashrate > 0 ? "Live" : "Pending"} 
                 isPositive={stats.hashrate > 0}
-                subValue={stats.hashrate > 0 ? `Total Hashes: ${stats.totalHashes?.toLocaleString() || 0}` : "Waiting for first share..."}
+                subValue={stats.hashrate > 0 || stats.totalHashes > 0 ? `Total Hashes: ${stats.totalHashes?.toLocaleString() || 0}` : "Waiting for first share..."}
               />
               <StatCard 
                 icon={<Server className="text-blue-500" />} 
@@ -264,27 +264,43 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 flex flex-col gap-6">
                 <div className="bg-[#0D0E12] border border-[#1E2128] rounded-2xl p-4 sm:p-6 relative overflow-hidden min-h-[400px] flex flex-col">
-                  <div className="flex justify-between items-center mb-8">
+                  <div className="flex justify-between items-start mb-8">
                     <div>
                       <h3 className="text-white font-semibold text-lg flex items-center gap-2">
                         Hashrate Performance
                         <TrendingUp className="text-green-500 w-4 h-4" />
                       </h3>
                       <p className="text-gray-500 text-xs">Live monitoring of pool performance</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+                        <span className="text-[10px] text-gray-500 font-mono">Last Sync: {new Date().toLocaleTimeString()}</span>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      {['1H', '1D', '1W'].map((t: any) => (
-                        <button 
-                          key={t} 
-                          onClick={() => setTimeframe(t)}
-                          className={cn(
-                            "px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all border cursor-pointer",
-                            t === timeframe ? "bg-orange-500/10 border-orange-500 text-orange-500" : "bg-[#151619] border-[#2A2D35] text-gray-500 hover:text-white"
-                          )}
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="flex gap-2">
+                        {['1H', '1D', '1W'].map((t: any) => (
+                          <button 
+                            key={t} 
+                            onClick={() => setTimeframe(t)}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all border cursor-pointer",
+                              t === timeframe ? "bg-orange-500/10 border-orange-500 text-orange-500" : "bg-[#151619] border-[#2A2D35] text-gray-500 hover:text-white"
+                            )}
+                          >
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                      {walletAddress && (
+                        <a 
+                          href={`https://moneroocean.stream/#/dashboard?addr=${walletAddress}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[9px] bg-orange-500/10 text-orange-500 px-2 py-1 rounded border border-orange-500/20 hover:bg-orange-500/20 transition-all font-bold uppercase tracking-wider"
                         >
-                          {t}
-                        </button>
-                      ))}
+                          Check Official Pool Stats ↗
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: 300 }}>
@@ -377,13 +393,27 @@ export default function Dashboard() {
                     desc="MoneroOcean Global Node (10128) selected" 
                   />
                   <Step 
-                    active={!!walletAddress && stats.hashrate === 0} 
-                    done={stats.hashrate > 0} 
+                    active={!!walletAddress && stats.hashrate === 0 && stats.totalHashes === 0} 
+                    done={stats.hashrate > 0 || stats.totalHashes > 0} 
                     title="Miner Integration" 
-                    desc={stats.hashrate > 0 ? "Connectivity Stable" : "Waiting for 'Accepted Share' in XMRig terminal..."} 
+                    desc={stats.hashrate > 0 || stats.totalHashes > 0 ? "Connectivity Stable" : "Waiting for 'Accepted Share' in XMRig terminal..."} 
                   />
+                  <div className="ml-8 p-3 bg-[#151619] border border-[#2A2D35] rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                       <span className="text-[10px] text-gray-400 font-mono">Verified Pool Address:</span>
+                    </div>
+                    <a 
+                      href={`https://moneroocean.stream/#/dashboard?addr=${walletAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-orange-500 hover:underline font-bold"
+                    >
+                      Open Official Stats ↗
+                    </a>
+                  </div>
                   <Step 
-                    active={stats.hashrate > 0} 
+                    active={stats.hashrate > 0 || stats.totalHashes > 0} 
                     done={stats.balance > 0} 
                     title="First Share Reward" 
                     desc={stats.balance > 0 ? "First reward confirmed" : "Verification usually takes 15-30 minutes"} 
@@ -408,8 +438,11 @@ export default function Dashboard() {
                     </div>
                     <div className="mt-4 p-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
                       <p className="text-[10px] text-orange-500 font-bold mb-1 uppercase">Terminal Warning:</p>
-                      <p className="text-[10px] text-gray-500 leading-relaxed">
+                      <p className="text-[10px] text-gray-500 leading-relaxed mb-2">
                         Wait for the <span className="text-green-500 font-mono">"net: accepted share"</span> message in your XMRig window. Stats will remain 0 until that specific message appears.
+                      </p>
+                      <p className="text-[9px] text-gray-600 italic">
+                        Note: Pool updates can lag by 5-10 minutes even after shares are accepted.
                       </p>
                     </div>
                   </div>

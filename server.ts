@@ -136,9 +136,14 @@ async function startServer() {
   app.get("/api/pool/stats/:address", async (req, res) => {
     try {
       const { address } = req.params;
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`);
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`, {
+        headers: {
+          'User-Agent': 'HashCloudPro/4.2.1 (Mining Dashboard Proxy)'
+        }
+      });
       
       if (!response.ok) {
+        console.error(`Pool API error for ${address}: ${response.status}`);
         return res.status(response.status).json({ error: "Pool API error", status: response.status });
       }
       
@@ -154,7 +159,11 @@ async function startServer() {
   app.get("/api/pool/workers/:address", async (req, res) => {
     try {
       const { address } = req.params;
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`);
+      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`, {
+        headers: {
+          'User-Agent': 'HashCloudPro/4.2.1 (Mining Dashboard Proxy)'
+        }
+      });
       
       if (!response.ok) {
         if (response.status === 404) return res.json([]); // No workers yet
