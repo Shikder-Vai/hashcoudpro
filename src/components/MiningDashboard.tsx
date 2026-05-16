@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [walletAddress, setWalletAddress] = React.useState<string | null>(() => {
     return localStorage.getItem('wallet_address');
   });
+  const [timeframe, setTimeframe] = React.useState<'1H' | '1D' | '1W'>('1D');
 
   const connectWallet = async () => {
     setIsConnectModalOpen(true);
@@ -112,11 +113,12 @@ export default function Dashboard() {
   };
 
   const chartData = React.useMemo(() => {
-    return Array.from({ length: 24 }, (_, i) => ({
-      time: `${i}:00`,
-      hashrate: stats.hashrate > 0 ? (stats.hashrate * (0.9 + Math.random() * 0.2)) : 0,
+    const points = timeframe === '1H' ? 60 : timeframe === '1D' ? 24 : 7;
+    return Array.from({ length: points }, (_, i) => ({
+      time: timeframe === '1H' ? `${i}m` : timeframe === '1D' ? `${i}:00` : `Day ${i + 1}`,
+      hashrate: stats.hashrate > 0 ? (stats.hashrate * (0.85 + Math.random() * 0.3)) : 0,
     }));
-  }, [stats.hashrate]);
+  }, [stats.hashrate, timeframe]);
 
   return (
     <div className="min-h-screen bg-[#0A0B0D] text-gray-300 font-sans selection:bg-orange-500/30">
@@ -268,11 +270,15 @@ export default function Dashboard() {
                       <p className="text-gray-500 text-xs">Live monitoring of pool performance</p>
                     </div>
                     <div className="flex gap-2">
-                      {['1H', '1D', '1W'].map(t => (
-                        <button key={t} className={cn(
-                          "px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all border",
-                          t === '1D' ? "bg-orange-500/10 border-orange-500 text-orange-500" : "bg-[#151619] border-[#2A2D35] text-gray-500 hover:text-white"
-                        )}>
+                      {['1H', '1D', '1W'].map((t: any) => (
+                        <button 
+                          key={t} 
+                          onClick={() => setTimeframe(t)}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all border cursor-pointer",
+                            t === timeframe ? "bg-orange-500/10 border-orange-500 text-orange-500" : "bg-[#151619] border-[#2A2D35] text-gray-500 hover:text-white"
+                          )}
+                        >
                           {t}
                         </button>
                       ))}
