@@ -4,6 +4,8 @@ import { Server, Activity, Plus, Terminal, Copy, Check } from 'lucide-react';
 import WorkerList from './WorkerList';
 
 export default function WorkersView() {
+  const [walletSymbol, setWalletSymbol] = React.useState(() => localStorage.getItem('wallet_symbol') || 'XMR');
+  const [walletAddress, setWalletAddress] = React.useState(() => localStorage.getItem('wallet_address') || '');
   const [isAdding, setIsAdding] = React.useState(false);
   const [newWorkerName, setNewWorkerName] = React.useState("");
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -95,24 +97,37 @@ export default function WorkersView() {
           <div className="bg-orange-500/5 border border-orange-500/10 p-6 rounded-2xl">
             <h3 className="text-white font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
               <Terminal className="w-4 h-4 text-orange-500" />
-              XMRig Config
+              {walletSymbol} Mining Config
             </h3>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-500 uppercase font-bold">Pool Host</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Pool Host & Port</p>
                 <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-orange-200 font-mono break-all border border-white/5">
                   gulf.moneroocean.stream:10128
                 </code>
               </div>
+              
               <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-500 uppercase font-bold">Algo (XMRig)</p>
-                <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-orange-200 font-mono border border-white/5">
-                  rx/0 (RandomX)
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Mining Command (XMRig)</p>
+                <code className="block bg-black p-3 rounded-lg text-[10px] text-green-400 font-mono break-all border border-white/10 leading-relaxed">
+                  xmrig.exe -o gulf.moneroocean.stream:10128 -u {walletAddress || `YOUR_${walletSymbol}_ADDRESS`} -p worker1
                 </code>
               </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Config.json Edit</p>
+                <div className="bg-black/60 p-3 rounded-lg border border-white/5 font-mono text-[9px] text-gray-400 space-y-1">
+                  <p>"url": "gulf.moneroocean.stream:10128",</p>
+                  <p>"user": "{walletAddress || `YOUR_${walletSymbol}_ADDRESS`}",</p>
+                  <p>"pass": "worker1"</p>
+                </div>
+              </div>
+
               <div className="pt-2">
-                <p className="text-[10px] text-gray-500 leading-relaxed italic">
-                  Ensure your wallet address here matches your miner's wallet setting to sync data.
+                <p className="text-[10px] text-gray-400 leading-relaxed italic">
+                  {walletSymbol === 'XMR' 
+                    ? "Mining directly to your Monero wallet." 
+                    : `Mining RandomX. MoneroOcean will pay you in ${walletSymbol}.`}
                 </p>
               </div>
             </div>
