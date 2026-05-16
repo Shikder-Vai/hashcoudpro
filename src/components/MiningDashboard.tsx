@@ -34,7 +34,12 @@ export default function Dashboard() {
     totalHashes: 0,
   });
 
-  const [prices, setPrices] = React.useState<any>(null);
+  const [prices, setPrices] = React.useState<any>({
+    XMR: 152.40,
+    BTC: 64100,
+    ETH: 3420,
+    LTC: 85
+  });
   const [isConnectModalOpen, setIsConnectModalOpen] = React.useState(false);
   const [selectedCoin, setSelectedCoin] = React.useState<{ symbol: string, balance: number } | null>(null);
   const [walletAddress, setWalletAddress] = React.useState<string | null>(() => {
@@ -70,11 +75,12 @@ export default function Dashboard() {
             BTC: data.BTC || data.bitcoin || 64000,
             ETH: data.ETH || data.ethereum || 3400,
             LTC: data.LTC || 85,
-            raw: data // Keep raw in case it's used elsewhere
+            raw: data 
           });
         }
       } catch (err) { 
-        console.error("Price fetch failed:", err); 
+        // Silent catch: server has fallbacks, and we have local defaults
+        console.warn("Price sync failed locally, background retry in 30s"); 
       }
     };
     
@@ -102,17 +108,21 @@ export default function Dashboard() {
           totalHashrate = Object.values(minerData.performance).reduce((acc: number, p: any) => acc + (p.hashrate || p.h || 0), 0);
         }
 
-        setStats({
+        setStats(prev => ({
+          ...prev,
           hashrate: totalHashrate,
           activeWorkers: activeCount,
           efficiency: totalHashrate > 0 ? 100 : 0,
           powerUsage: activeCount > 0 ? activeCount * 150 : (totalHashrate > 0 ? 150 : 0),
           balance: minerData.balance || 0,
           totalHashes: minerData.totalHashes || 0
-        });
+        }));
       } catch (e: any) { 
         console.error("Real data fetch failed:", e); 
-        setLastError(e.message || "Failed to reach node");
+        // Only set error if we don't have any data at all yet
+        if (stats.totalHashes === 0) {
+          setLastError(e.message || "Failed to reach pool node");
+        }
       }
     };
 

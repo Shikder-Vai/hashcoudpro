@@ -12,15 +12,16 @@ export async function getRealMinerStats(address: string): Promise<MinerStats> {
   try {
     const response = await fetch(`/api/pool/stats/${address}`);
     if (!response.ok) {
-      // If pool doesn't know address, it's not necessarily a fatal error
-      return {
-        hashrate: 0,
-        balance: 0,
-        totalHashes: 0,
-        activeWorkers: 0,
-        lastShare: 0
-      };
+      if (response.status === 404) return { hashrate: 0, balance: 0, totalHashes: 0, activeWorkers: 0, lastShare: 0 };
+      throw new Error(`API returned ${response.status}`);
     }
+    
+    // Check Content-Type to ensure we got JSON
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("API returned non-JSON response");
+    }
+
     const data = await response.json();
     console.log("Pool Stats Data:", data);
     
@@ -57,7 +58,13 @@ export async function getRealWorkerList(address: string) {
 
     // 2. Fetch identifiers list
     const response = await fetch(`/api/pool/workers/${address}`);
-    const identifiers = response.ok ? await response.json() : [];
+    let identifiers: any[] = [];
+    if (response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        identifiers = await response.json();
+      }
+    }
     
     // 3. Map performance data if available
     if (performance && typeof performance === 'object') {
@@ -122,8 +129,10 @@ export async function getRealWorkerList(address: string) {
 export async function getNetworkStats() {
   try {
     const response = await fetch('https://api.moneroocean.stream/network/stats');
+    if (!response.ok) return null;
     return await response.json();
   } catch (e) {
+    console.warn("Network stats fetch failed (external):", e);
     return null;
   }
 }

@@ -101,25 +101,26 @@ export default function WorkersView() {
             </h3>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-500 uppercase font-bold">Pool Host & Port</p>
-                <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-orange-200 font-mono break-all border border-white/5">
-                  gulf.moneroocean.stream:10128
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Pool Host & Port (SSL/TLS)</p>
+                <code className="block bg-black/40 p-2 rounded-lg text-[10px] text-emerald-400 font-mono break-all border border-white/5">
+                  gulf.moneroocean.stream:443
                 </code>
               </div>
               
               <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-500 uppercase font-bold">Mining Command (XMRig)</p>
-                <code className="block bg-black p-3 rounded-lg text-[10px] text-green-400 font-mono break-all border border-white/10 leading-relaxed">
-                  xmrig.exe -o gulf.moneroocean.stream:10128 -u {walletAddress || `YOUR_${walletSymbol}_ADDRESS`} -p worker1
+                <p className="text-[10px] text-gray-500 uppercase font-bold">Mining Command (XMRig - Recommended)</p>
+                <code className="block bg-black p-3 rounded-lg text-[10px] text-emerald-400 font-mono break-all border border-white/10 leading-relaxed">
+                  xmrig.exe -o gulf.moneroocean.stream:443 -u {walletAddress || `YOUR_${walletSymbol}_ADDRESS`} -p worker1 --tls
                 </code>
               </div>
 
               <div className="space-y-1.5">
                 <p className="text-[10px] text-gray-500 uppercase font-bold">Config.json Edit</p>
                 <div className="bg-black/60 p-3 rounded-lg border border-white/5 font-mono text-[9px] text-gray-400 space-y-1">
-                  <p>"url": "gulf.moneroocean.stream:10128",</p>
+                  <p>"url": "gulf.moneroocean.stream:443",</p>
                   <p>"user": "{walletAddress || `YOUR_${walletSymbol}_ADDRESS`}",</p>
-                  <p>"pass": "worker1"</p>
+                  <p>"pass": "worker1",</p>
+                  <p>"tls": true</p>
                 </div>
               </div>
 

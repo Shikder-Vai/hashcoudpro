@@ -119,18 +119,18 @@ export default function PoolsView() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-[9px] text-gray-600 uppercase">Pool Address</p>
-                    <code className="text-xs text-orange-300 font-mono">gulf.moneroocean.stream:10128</code>
+                    <code className="text-xs text-emerald-400 font-mono">gulf.moneroocean.stream:443 (SSL/TLS)</code>
                   </div>
                   <div>
                     <p className="text-[9px] text-gray-600 uppercase">Your Config Flag</p>
                     <div className="bg-black/40 p-2 rounded border border-[#2A2D35] text-[10px] font-mono text-gray-400 break-all space-y-2">
                        <div>
-                         <p className="text-[8px] text-gray-600 mb-1">Standard Port (10128):</p>
-                         -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
+                         <p className="text-[8px] text-emerald-600 mb-1 font-bold">Highly Recommended: SSL Port (443) - Standard Web Port:</p>
+                         -o gulf.moneroocean.stream:443 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1 --tls
                        </div>
                        <div className="border-t border-[#2A2D35] pt-2">
-                         <p className="text-[8px] text-emerald-600 mb-1 font-bold">Recommended: SSL Port (443) - Bypasses ISP Blocks:</p>
-                         -o gulf.moneroocean.stream:443 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1 --tls
+                         <p className="text-[8px] text-gray-600 mb-1">Standard Port (10128):</p>
+                         -o gulf.moneroocean.stream:10128 -u {localStorage.getItem('wallet_address') || 'YOUR_WALLET'} -p worker1
                        </div>
                        <div className="border-t border-[#2A2D35] pt-2">
                          <p className="text-[8px] text-blue-600 mb-1">Alternative SSL (20128):</p>

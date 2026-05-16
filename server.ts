@@ -4,6 +4,23 @@ import "dotenv/config";
 import { createServer as createViteServer } from "vite";
 import { getMiningOptimization, analyzeHardwareSuitability } from "./src/lib/gemini.js";
 
+// Utility for fetch with timeout (Native AbortController supported in Node 18+)
+async function fetchWithTimeout(url: string, options: any = {}, timeout = 10000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -79,29 +96,41 @@ async function startServer() {
 // Real crypto prices from public API (fallback to simulation if API fails)
   app.get("/api/prices", async (req, res) => {
     try {
-      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero,litecoin&vs_currencies=usd&include_24hr_change=true");
-      if (!response.ok) throw new Error("Gecko API error");
+      // Shorter 5s timeout for user-facing prices
+      const response = await fetchWithTimeout("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero,litecoin&vs_currencies=usd&include_24hr_change=true", {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      }, 5000);
+      
+      if (!response.ok) throw new Error(`Price API status: ${response.status}`);
       const data = await response.json();
+      
       res.json({
-        monero: data.monero?.usd || 150.25,
+        monero: data.monero?.usd || 151.25,
         monero_24h_change: data.monero?.usd_24h_change || 0,
-        bitcoin: data.bitcoin?.usd || 64000,
+        bitcoin: data.bitcoin?.usd || 64200,
         bitcoin_24h_change: data.bitcoin?.usd_24h_change || 0,
-        ethereum: data.ethereum?.usd || 3400,
+        ethereum: data.ethereum?.usd || 3410,
         ethereum_24h_change: data.ethereum?.usd_24h_change || 0,
-        litecoin: data.litecoin?.usd || 85,
+        litecoin: data.litecoin?.usd || 86,
         litecoin_24h_change: data.litecoin?.usd_24h_change || 0,
-        XMR: data.monero?.usd || 150.25,
-        BTC: data.bitcoin?.usd || 64000,
-        ETH: data.ethereum?.usd || 3400,
-        LTC: data.litecoin?.usd || 85,
+        XMR: data.monero?.usd || 151.25,
+        BTC: data.bitcoin?.usd || 64200,
+        ETH: data.ethereum?.usd || 3410,
+        LTC: data.litecoin?.usd || 86,
       });
-    } catch (error) {
-      // Fallback
+    } catch (error: any) {
+      console.warn(`[Prices] Proxy call failed: ${error.message || 'Timeout'}. Using fallback.`);
+      // Solid fallback prices
       res.json({
         monero: 152.40 + Math.random() * 2,
+        monero_24h_change: 0.1,
         bitcoin: 64100 + Math.random() * 500,
+        bitcoin_24h_change: -0.1,
         ethereum: 3420 + Math.random() * 50,
+        ethereum_24h_change: 0.5,
         XMR: 152.40 + Math.random() * 2,
         BTC: 64100 + Math.random() * 500,
         ETH: 3420 + Math.random() * 50,
@@ -137,23 +166,31 @@ async function startServer() {
     try {
       const { address } = req.params;
       console.log(`[Proxy] Fetching stats for ${address}...`);
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/stats`, {
+      
+      const response = await fetchWithTimeout(`https://api.moneroocean.stream/miner/${address}/stats`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'Accept': 'application/json'
         }
-      });
+      }, 10000); // 10s timeout
       
       if (!response.ok) {
         const errorText = await response.text().catch(() => "No error body");
         console.error(`[Proxy] Pool API error for ${address}: ${response.status} - ${errorText}`);
-        return res.status(response.status).json({ error: "Pool API error", status: response.status, detail: errorText });
+        
+        // Return a mock success response if it's a 404 to keep UI happy
+        if (response.status === 404) {
+          return res.json({ hashrate: 0, balance: 0, hashes: 0, performance: {} });
+        }
+        
+        return res.status(response.status).json({ error: "Pool API responded with error", status: response.status });
       }
       
       const data = await response.json();
       res.json(data);
-    } catch (error) {
-      console.error("Pool stats proxy error:", error);
-      res.status(500).json({ error: "Failed to fetch stats" });
+    } catch (error: any) {
+      console.error(`[Proxy] Pool stats fetch failed for ${req.params.address}:`, error.message);
+      res.status(504).json({ error: "Pool API timeout or network error" });
     }
   });
 
@@ -161,24 +198,26 @@ async function startServer() {
   app.get("/api/pool/workers/:address", async (req, res) => {
     try {
       const { address } = req.params;
-      const response = await fetch(`https://api.moneroocean.stream/miner/${address}/identifiers`, {
+      
+      const response = await fetchWithTimeout(`https://api.moneroocean.stream/miner/${address}/identifiers`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'Accept': 'application/json'
         }
-      });
+      }, 10000);
       
       if (!response.ok) {
+        if (response.status === 404) return res.json([]); 
         const errorText = await response.text().catch(() => "No error body");
         console.error(`[Proxy] Workers API error for ${address}: ${response.status} - ${errorText}`);
-        if (response.status === 404) return res.json([]); // No workers yet
         return res.status(response.status).json({ error: "Pool API error", status: response.status });
       }
 
       const data = await response.json();
       res.json(data);
-    } catch (error) {
-      console.error("Pool workers proxy error:", error);
-      res.status(500).json({ error: "Failed to fetch workers" });
+    } catch (error: any) {
+      console.error(`[Proxy] Pool workers fetch failed for ${req.params.address}:`, error.message);
+      res.status(504).json({ error: "Pool API timeout or network error" });
     }
   });
 
